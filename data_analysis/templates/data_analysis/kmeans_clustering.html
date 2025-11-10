@@ -1,0 +1,108 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+
+{% block title %}K-Means Clustering{% endblock %}
+
+{% block formulario %}
+
+    <form action="{% url 'data_analysis:kmeans_clustering' file_name=file_name %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex align-items-center mb-4 justify-content-between">
+                <h5 class="mb-0 me-4">K-Means Clustering</h5>
+                <!-- Botón para abrir el modal -->
+                <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+                    <i class="bi bi-book"></i> Ayuda
+                </button>
+            </div>
+
+            <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+                
+                <div style="width: 100%">
+                    <p>Selecciona las características (X)</p>
+                    <div class="form-check mb-2">
+                        <!-- Casilla para seleccionar o deseleccionar todo -->
+                        <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                        <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                            Seleccionar todo
+                        </label>
+                    </div>
+                    <!-- Distribución de columnas -->
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                        {% for columna in columnas %}
+                        <div class="col" style="overflow: hidden">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="caracteristicas" value="{{ columna }}" id="check_{{ columna }}">
+                                <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                                    {{ columna }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="n_clusters">Número de Clusters:</label>
+                    <input type="number" class="form-control" id="n_clusters" name="n_clusters" min="1" value="3">
+                </div>
+
+            </div>
+
+
+            {{ block.super }}
+        </form>
+
+        <!-- seleccionar todo -->
+        <script>
+            document.getElementById('seleccionar_todo').addEventListener('change', function() {
+                var checkboxes = document.querySelectorAll('[name="caracteristicas"]');
+                checkboxes.forEach(chk => {
+                    chk.checked = this.checked;
+                });
+            });
+        </script>
+
+        <script>
+            $(document).ready(function(){
+                $('[data-toggle="tooltip"]').tooltip();
+                // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+                $('#modalInstrucciones').on('hidden.bs.modal', function () {
+                });
+            });
+        </script>
+
+        <!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>K-Means Clustering</h5>
+                <p>K-Means es un algoritmo de agrupamiento que agrupa datos en K grupos distintos basados en sus características. Es uno de los algoritmos de clustering más utilizados debido a su simplicidad y eficiencia.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Selecciona las Características (X):</strong> Elige las características o variables que deseas utilizar para agrupar los datos. Puedes seleccionar todas las columnas o elegir características específicas.</li>
+                    <li><strong>Número de Clusters:</strong> Define el número de clusters (K) en los que deseas dividir los datos. Este número debe ser especificado por el usuario y puede variar según el problema y los datos.</li>
+                </ol>
+
+                <hr>
+                <h6>Resultados:</h6>
+                <p>Nos mostrará los clusters por cada relación entre las columnas seleccionadas junto con la <strong>Distribución de muestras por cluster</strong>.</p>
+
+                <hr>
+                <h6>Centroides de clusters</h6>
+                <p>Gráfico por pares del clustering</p>
+
+                <hr>
+                <h6>Gráfico de siluetas de los clusters</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+            
+{% endblock %}

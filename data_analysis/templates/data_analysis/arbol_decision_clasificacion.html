@@ -1,0 +1,146 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+
+{% block title %}Árbol de Decisión de Clasificaciónes{% endblock %}
+
+{% block formulario %}
+
+    <form action="{% url 'data_analysis:arbol_decision_clasificacion' file_name=file_name %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex align-items-center mb-4 justify-content-between">
+                <h5 class="mb-0 me-4">Árbol de Decisión de Clasificación</h5>
+                <!-- Botón para abrir el modal, ajustado para estar al lado del h5 -->
+                <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+                    <i class="bi bi-book"></i> Ayuda
+                </button>
+            </div>
+
+            <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+                
+                <div>
+                    <p>Selecciona la variable objetivo (Y)</p>
+                    <select class="form-select" id="variable_objetivo" name="variable_objetivo">
+                        {% for columna in columnas_categoricas %}
+                        {% if columna|length > 0 %}
+                        <option value="{{ columna }}">{{ columna }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="width: 100%">
+                    <p>Selecciona las características (X)</p>
+                    <div class="form-check mb-2">
+                        <!-- Casilla para seleccionar o deseleccionar todo -->
+                        <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                        <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                            Seleccionar todo
+                        </label>
+                    </div>
+                    <!-- Distribución de columnas utilizando el sistema de grid de Bootstrap -->
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                        {% for columna in columnas_numericas %}
+                        <div class="col" style="overflow: hidden">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="caracteristicas" value="{{ columna }}" id="check_{{ columna }}">
+                                <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                                    {{ columna }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="max_depth">Profundidad máxima:</label>
+                    <input type="number" class="form-control" id="max_depth" name="max_depth" min="1" value="3">
+                </div>
+
+                <div class="form-group">
+                    <label for="min_samples_leaf">Mínimo de muestras por hoja:</label>
+                    <input type="number" class="form-control" id="min_samples_leaf" name="min_samples_leaf" min="1" value="1">
+                </div>
+
+            </div>
+
+            {{ block.super }}
+    </form>
+
+    <!-- seleccionar todo -->
+    <script>
+        document.getElementById('seleccionar_todo').addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('[name="caracteristicas"]');
+            checkboxes.forEach(chk => {
+                chk.checked = this.checked;
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+            // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+            $('#modalInstrucciones').on('hidden.bs.modal', function () {
+            });
+        });
+    </script>
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Árbol de Decisión de Clasificación</h5>
+                <p>Un árbol de decisión de clasificación es una herramienta de aprendizaje automático utilizada para predecir una variable objetivo categórica (booleana) basada en varias características de entrada. Este modelo divide los datos en ramas que representan decisiones basadas en las características de los datos.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Selecciona la Variable Objetivo (Y):</strong> Elige la variable objetivo booleana que deseas predecir.</li>
+                    <li><strong>Selecciona las Características (X):</strong> Elige las columnas o variables que deseas utilizar para predecir la variable objetivo. Puedes seleccionar todas las columnas.</li>
+                    <li><strong>Profundidad Máxima:</strong> Define la profundidad máxima del árbol. Esto controla hasta qué punto se dividirá el árbol. Un valor mayor puede llevar a un ajuste excesivo, mientras que un valor menor puede llevar a un ajuste insuficiente.</li>
+                    <li><strong>Mínimo de Muestras por Hoja:</strong> Define el número mínimo de muestras que debe tener una hoja final. Esto ayuda a evitar la división de hojas que contienen muy pocos datos.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <div class="text-center">
+                    <pre>| Edad | Colesterol | Presión Arterial | Problema Cardiaco (Y) |
+| --- | --- | --- | --- |
+| 45  | 220       | 130              | Sí                   |
+| 50  | 180       | 120              | No                   |
+| 40  | 200       | 140              | Sí                   |
+| 60  | 240       | 150              | Sí                   |
+| 55  | 210       | 135              | No                   |
+| 48  | 230       | 145              | Sí                   |
+| 52  | 190       | 125              | No                   |
+| 47  | 195       | 140              | No                   |
+| 43  | 205       | 130              | Sí                   |
+| 58  | 215       | 135              | Sí                   |</pre>
+                </div>
+
+                <hr>
+                <h6>Variable Objetivo (Y): "Problema Cardiaco"</h6>
+                <h6>Características (X): "Edad", "Colesterol", "Presión Arterial"</h6>
+
+                <hr>
+                <h6>Configuraciones del Árbol de Decisión</h6>
+                <p><strong>Profundidad Máxima:</strong> 3</p>
+                <p><strong>Mínimo de Muestras por Hoja:</strong> 2</p>
+
+                <hr>
+                <h6>Resultados del Árbol de Decisión</h6>
+                <p>Al entrenar el modelo con estas configuraciones, se obtiene un árbol de decisión que puede predecir si un paciente tiene un problema cardiaco basado en su edad, nivel de colesterol y presión arterial. El árbol se construirá de manera que se tomen decisiones óptimas en cada nodo hasta alcanzar la profundidad máxima o el mínimo de muestras por hoja especificado.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+{% block formulario %}
+
+<form action="{% url 'data_analysis:prueba_hipotesis' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Prueba de Hipótesis</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+        <div>
+            <label for="mu" class="form-label">Valor de Mu (μ / H0):</label>
+            <input type="number" class="form-control" id="mu" name="mu" required>
+        </div>
+
+        <div>
+            <label for="tipo_prueba" class="form-label">Tipo de Prueba:</label>
+            <select class="form-select pe-5" id="tipo_prueba" name="tipo_prueba">
+                <option value="dos_colas">Dos colas</option>
+                <option value="una_cola_izq">Una cola (izquierda / <)</option>
+                <option value="una_cola_der">Una cola (derecha / >)</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="nivel_significancia" class="form-label">Nivel de Significancia (α):</label>
+            <select class="form-select" id="nivel_significancia" name="nivel_significancia">
+                <option value="0.01">0.01</option>
+                <option value="0.05" selected>0.05</option>
+                <option value="0.10">0.10</option>
+            </select>
+        </div>
+
+        <div style="width: 100%">
+            <p>Elija las columnas numéricas que desea analizar:</p>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                {% for columna in columnas_numericas %}
+                <div class="col">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                        <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}">
+                            {{ columna }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+
+    {{ block.super }}
+</form>
+
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Prueba de Hipótesis</h5>
+                <p>La prueba de hipótesis es una técnica estadística utilizada para tomar decisiones o inferencias sobre una población basada en una muestra de datos.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Elija las Columnas Numéricas que Desea Analizar:</strong> Seleccione las columnas numéricas para las que desea realizar la prueba de hipótesis. Puede elegir todas las columnas numéricas o seleccionar columnas específicas.</li>
+                </ol>
+
+                <hr>
+                <h6>Resultados de la Prueba de Hipótesis</h6>
+                <p>Resultados del análisis estadístico para comprobar una hipótesis.</p>
+                <ul>
+                    <li><strong>Media:</strong> Promedio de los datos.</li>
+                    <li><strong>Desviación estándar:</strong> Medida de la dispersión de los datos.</li>
+                    <li><strong>Estadístico t:</strong> Valor calculado para la prueba t.</li>
+                    <li><strong>P-valor:</strong> Probabilidad de obtener un resultado extremo bajo la hipótesis nula.</li>
+                    <li><strong>Conclusión:</strong> Decisión sobre la hipótesis basada en el p-valor.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

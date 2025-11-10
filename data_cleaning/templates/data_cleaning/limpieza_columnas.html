@@ -1,0 +1,113 @@
+{% extends "data_cleaning/plantilla_opciones.html" %}
+{% block title %}Eliminar columnas{% endblock %}
+
+{% block formulario %}
+
+<form action="{% url 'data_cleaning:eliminar_columnas' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Eliminar columnas</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+        <div style="min-width: 60%">
+            <p>Seleccione las columnas que desea eliminar:</p>
+            <div class="form-check mb-2">
+                <!-- Casilla para seleccionar o deseleccionar todo -->
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            <!-- Distribución de columnas -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                {% for columna in columnas %}
+                <div class="col" style="overflow: hidden">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                        <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                            {{ columna }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {{ block.super }}
+</form>
+
+<!-- seleccionar todo -->
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Eliminar Columnas</h5>
+                <p>La función de eliminar columnas permite al usuario seleccionar una o más columnas del DataFrame y, al aplicar los cambios, estas columnas serán eliminadas del DataFrame.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Seleccionar Columnas:</strong> Decide qué columnas del DataFrame deseas eliminar. Puedes seleccionar una o varias columnas.</li>
+                    <li><strong>Aplicar Cambios:</strong> Una vez seleccionadas las columnas a eliminar, aplica los cambios para que estas columnas sean removidas del DataFrame.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <p>Supongamos que se tiene el siguiente DataFrame:</p>
+                <div class="text-center">
+                    <pre>| Nombre  | Edad | Ciudad    | Ocupación |
+| ------- | ---- | --------- | ---------- |
+| Juan    | 28   | Madrid    | Ingeniero  |
+| María   | 34   | Barcelona | Doctora    |
+| Pedro   | 45   | Valencia  | Profesor   |
+| Ana     | 29   | Sevilla   | Abogada    |</pre>
+                </div>
+
+                <hr>
+                <h6>Resultados</h6>
+                <p>Si se eliminan las columnas "Edad" y "Ciudad", el DataFrame resultante será:</p>
+                <div class="text-center">
+                    <pre>| Nombre  | Ocupación |
+| ------- | ---------- |
+| Juan    | Ingeniero  |
+| María   | Doctora    |
+| Pedro   | Profesor   |
+| Ana     | Abogada    |</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

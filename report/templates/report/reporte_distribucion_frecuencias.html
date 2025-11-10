@@ -1,0 +1,132 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+    <!-- Distribución de Frecuencias -->
+    <div class="container mt-5 mb-5">
+        <h4>Distribución de Frecuencias
+                <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                <strong>La frecuencia es el número de veces que un valor específico aparece en un conjunto de datos.<br>">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+                </button>        
+        </h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Columna</th>
+                    <th>
+                           Frecuencia
+                    </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for valor, frecuencias in reporte_data.resultados.frecuencias.items %}
+                        <tr>
+                            <td>{{ valor }}</td>
+                            <td>
+                                <ul style="list-style-type: none; padding: 0;">
+                                    {% for nivel, frecuencia in frecuencias.items %}
+                                        <li>{{ nivel }}: {{ frecuencia }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gráfico de Distribución de Frecuencias -->
+    <div class="container mt-5 mb-5">
+        <h3>Gráfico de Distribución de Frecuencias</h3>
+        <canvas id="grafico_frecuencias"></canvas>
+    </div>
+
+    <script>
+
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        var etiquetas = [];
+        var valores = [];
+
+        {% for columna, frecuencias in reporte_data.resultados.frecuencias.items %}
+            {% for etiqueta, frecuencia in frecuencias.items %}
+                etiquetas.push("{{ etiqueta }}");
+                valores.push({{ frecuencia }});
+            {% endfor %}
+        {% endfor %}
+
+        var ctx = document.getElementById('grafico_frecuencias').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: etiquetas,
+                datasets: [{
+                    label: 'Frecuencia',
+                    data: valores,
+                    backgroundColor: 'rgba(7, 73, 97, 0.8)',
+                    borderColor: 'rgba(5, 137, 97, 0.8)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+
+    <!-- Script para mostrar tooltips -->
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            $('#infoBtn').click(function(){
+                var tooltip = $(this).siblings('.tooltip');
+                tooltip.toggleClass('show');
+            });
+        });
+    </script>
+
+{% endblock %}

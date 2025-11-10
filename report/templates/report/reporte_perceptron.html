@@ -1,0 +1,150 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+
+    <!-- Estadísticas Básicas -->
+    <div class="container mt-5 mb-5">
+        <h4>Resultados del Modelo
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                    <strong>Accuracy:</strong> Porcentaje de predicciones correctas.<br>
+                    <strong>Parámetros del Modelo:</strong> Configuraciones del modelo como tamaño de capas ocultas, función de activación, etc.">
+            <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Resultado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat, value in reporte_data.resultados.estadisticas.items %}
+                    <tr>
+                        <td>{{ stat }}</td>
+                        {% if stat == 'Variables Predictoras' %}
+                            <td>
+                                {% for variable in value %}
+                                    {{ variable }}<br>
+                                {% endfor %}
+                            </td>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    </div>
+
+    <!-- Reporte de Clasificación -->
+    <div class="container mt-5 mb-5">
+        <h4>Reporte de Clasificación
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                    <strong>Precisión:</strong> Proporción de verdaderos positivos entre todos los casos clasificados como positivos.<br>
+                    <strong>Recall:</strong> Proporción de verdaderos positivos entre todos los casos positivos.<br>
+                    <strong>F1-Score:</strong> Promedio armónico entre precisión y recall.<br>
+                    <strong>Soporte:</strong> Número de muestras de cada clase en el conjunto de datos.">
+            <i class="text-info fas fa-question-circle fa-lg"></i>
+            </Button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Precisión</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                        <th>Soporte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in reporte_data.resultados.reporte_clasificacion %}
+                        <tr>
+                            <td>{{ fila.clase }}</td>
+                            <td>{{ fila.precision|floatformat:3 }}</td>
+                            <td>{{ fila.recall|floatformat:3 }}</td>
+                            <td>{{ fila.f1_score|floatformat:3 }}</td>
+                            <td>{{ fila.soporte }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Matriz de Confusión -->
+    <div class="container mt-5 mb-5">
+        <h4>Matriz de Confusión
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                <strong>Matriz de Confusión:</strong> Tabla que muestra la relación entre las etiquetas reales y las predichas por el modelo, ideal para visualizar el rendimiento del modelo.">
+            <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Real \ Predicho</th>
+                        {% for clase in reporte_data.resultados.classes %}
+                            <th>{{ clase }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clase, fila in reporte_data.resultados.clases_y_filas %}
+                        <tr>
+                            <th>{{ clase }}</th>
+                            {% for valor in fila %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Curva pérdida del Entrenamiento -->
+    <div class="container mt-5 mb-5">
+        <h4>Curva de Pérdida de Entrenamiento
+            <img src="/temp_files/{{ reporte_data.resultados.path_imagen_perdida }}" alt="Curva de Pérdida de Entrenamiento"
+            class="img-fluid mx-auto d-block p-2 incluye-en-reporte" style="max-width: 100%; height: auto;">
+        </h4>
+    </div>
+
+{% endblock %}

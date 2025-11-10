@@ -1,0 +1,128 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Muestra de datos analizados -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+    <!-- Resultados de la prueba t de una muestra -->
+    <div class="container mt-5 mb-5">
+        <h4>Resultados de la prueba t de una muestra
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Media:</strong> La media es el promedio de los valores en la muestra.<br>
+            <strong>Desviación Estándar:</strong> La desviación estándar es una medida de dispersión que indica cuánto se alejan los valores de la media.<br>
+            <strong>Estadístico t:</strong> El valor estadístico t indica la diferencia entre la media muestral y la media poblacional. Un valor t grande sugiere una diferencia significativa, mientras que uno pequeño indica una diferencia menos notable. Generalmente, un valor t mayor que 2 se considera grande, y uno menor que 2 se considera pequeño.<br>">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Columna</th>
+                        <th>
+                            Media
+                        </th>
+                        <th>
+                            Desviación Estándar
+                        </th>
+                        <th>
+                            Estadístico t
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for columna, resultados in reporte_data.resultados.prueba_t.items %}
+                        <tr>
+                            <td>{{ columna }}</td>
+                            <td>{{ resultados.Media }}</td>
+                            <td>{{ resultados.Desviacion_Estandar }}</td>
+                            <td>{{ resultados.T }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Valores de prueba de hipótesis -->
+    <div class="container mt-5 mb-5">
+        <h4>Valores de prueba de hipótesis
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>P-valor:</strong> El valor p indica la probabilidad de obtener un valor de t igual o más extremo que el observado si la hipótesis nula es verdadera. Si el valor p es pequeño (generalmente menor que 0.05), se rechaza la hipótesis nula y se considera que hay una diferencia significativa. Si es grande, se acepta la hipótesis nula y se considera que no hay una diferencia significativa.<br>
+            <strong>Conclusión:</strong> La hipótesis nula se rechaza si el P-valor es menor que 0.05, indicando una diferencia significativa. Se acepta si el P-valor es mayor o igual a 0.05, indicando que no hay una diferencia significativa.<br>">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Columna</th>
+                        <th>
+                            P-valor
+                        </th>
+                        <th>
+                            Conclusión
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for columna, resultados in reporte_data.resultados.prueba_t.items %}
+                        <tr>
+                            <td>{{ columna }}</td>
+                            <td>{{ resultados.P_valor }}</td>
+                            <td>
+                                {{ resultados.Conclusion }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- gráfico de la prueba de hipótesis -->
+    {% for columna, resultados in reporte_data.resultados.prueba_t.items %}
+        {% if resultados.grafico_path %}
+            <div class="container mt-5 mb-5">
+                <h4>Gráfico de la prueba T para {{ columna }}</h4>
+                <img src="/temp_files/{{ resultados.grafico_path }}" alt="Gráfico de Prueba de Hipótesis para {{ columna }}"
+                    class="img-fluid mx-auto d-block p-2 incluye-en-reporte" style="max-width: 80%;">
+            </div>
+        {% endif %}
+    {% endfor %}
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+{% endblock %}

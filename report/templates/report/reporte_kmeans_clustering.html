@@ -1,0 +1,157 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+    <!-- Estadísticas Básicas -->
+    <div class="container mt-5 mb-5">
+        <h4>Resultados del modelo
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Resultados del modelo:</strong> Incluyen métricas clave sobre la calidad y configuración del modelo de clustering.<br>
+            <strong>Silhouette Score:</strong> Indica qué tan bien se agrupan las muestras dentro de sus clusters. Un valor más alto indica una mejor cohesión de los clusters.<br>
+            <strong>Número de Clusters:</strong> La cantidad total de clusters creados por el modelo.<br>
+            <strong>Método de Inicialización:</strong> El método utilizado para inicializar los centroides de los clusters, como K-means++.<br>
+            <strong>Número de Iteraciones:</strong> El número de iteraciones que el algoritmo necesitó para converger.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Resultado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat, value in reporte_data.resultados.estadisticas.items %}
+                    <tr>
+                        <td>{{ stat }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    </div>
+
+    <!-- Distribución de Muestras por Cluster -->
+    <div class="container mt-5 mb-5">
+        <h4>Distribución de muestras por cluster
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Distribución de muestras por cluster:</strong> Muestra el número de muestras asignadas a cada cluster.<br>
+            <strong>Clusters:</strong> Grupos de datos similares identificados por el algoritmo de clustering.<br>
+            <strong>Cantidad de Muestras:</strong> Número de datos en cada cluster.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cluster</th>
+                        <th>Cantidad de Muestras</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cluster_id, cantidad in reporte_data.resultados.distribucion_muestras.items %}
+                    <tr>
+                        <td>{{ cluster_id }}</td>
+                        <td>{{ cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Centroides de Clusters -->
+    <div class="container mt-5 mb-5">
+        <h4>Centroides de clusters
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Centroides de clusters:</strong> Puntos medios de cada cluster, representando la media de las características de las muestras en el cluster.<br>
+            <strong>Columnas:</strong> Variables analizadas.<br>
+            <strong>Filas:</strong> Coordenadas de los centroides en el espacio de las características.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for centroide in reporte_data.resultados.centroides %}
+                    <tr>
+                        {% for valor in centroide %}
+                            <td>{{ valor }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Visualización de Clusters -->
+    <div class="container mt-5 mb-5">
+        <h4>Gráfico por pares del clustering
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Gráfico por pares del clustering:</strong> Visualiza la relación entre pares de variables coloreadas según los clusters.<br>
+            <strong>Gráficos de dispersión:</strong> Muestran cómo se distribuyen las muestras en cada par de variables.<br>
+            <strong>Clusters:</strong> Indican la agrupación de datos según las características analizadas.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <img src="/temp_files/{{ reporte_data.resultados.path_imagen_clusters }}" alt="Visualización de K-Means Clustering"
+            class="img-fluid mx-auto d-block p-2 incluye-en-reporte">
+    </div>
+
+    <!-- Gráfico de siluetas de los clusters -->
+    <div class="container mt-5 mb-5">
+        <h4>Gráfico de siluetas de los clusters
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Gráfico de siluetas de los clusters:</strong> Mide la coherencia de los clusters, mostrando qué tan similares son las muestras a su propio cluster en comparación con otros clusters.<br>
+            <strong>Valores de silueta:</strong> Varían entre -1 y 1, donde valores cercanos a 1 indican muestras bien agrupadas, valores cercanos a 0 indican superposición entre clusters y valores negativos indican posibles asignaciones incorrectas.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <img src="/temp_files/{{ reporte_data.resultados.path_imagen_silhouette }}" alt="Visualización de K-Means Clustering"
+            class="img-fluid mx-auto d-block p-2 incluye-en-reporte">
+    </div>
+    
+
+{% endblock %}

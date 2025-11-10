@@ -1,0 +1,140 @@
+{% extends "data_transformation/plantilla_opciones.html" %}
+
+{% block formulario %}
+
+<form action="{% url 'data_transformation:standardization' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Escalado y estandarización de datos</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+
+        <div>
+            <p>Seleccione el tipo de escalado:</p>
+            <select class="form-select" id="tipo" name="tipo">
+                <option value="minmax">Escalado MinMax</option>
+                <option value="maxabs">Escalado MaxAbs</option>
+                <option value="estandar">Escalado Estándar</option>
+            </select>
+        </div>
+
+        <div style="width: 100%">
+            <p>Seleccione las columnas que desea modificar:</p>
+            <div class="form-check mb-2">
+                <!-- Casilla para seleccionar o deseleccionar todo -->
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            {% if columnas %}
+                <!-- Distribución de columnas -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                    {% for columna in columnas %}
+                    <div class="col" style="overflow: hidden">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input column-checkbox" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                            <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                                {{ columna }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <small class="text-info">
+                    <i class="bi bi-info-circle-fill"></i> No hay columnas disponibles para modificar.
+                </small>
+            {% endif %}
+        </div>
+        
+
+    </div>
+
+    {{ block.super }}
+</form>
+
+<!-- seleccionar todo -->
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Escalado y Estandarización de Datos</h5>
+                <p>El normalizar los valores de las variables, asegurando que todas las características contribuyan de manera equitativa al análisis o modelado.</p>
+
+                <hr>
+                <h5>Tipos de Escalado</h5>
+                <ol>
+                    <li><strong>Escalado MinMax:</strong> Este método transforma los valores de las variables a un rango específico, generalmente entre 0 y 1.</li>
+                    <li><strong>Escalado MaxAbs:</strong> Este método escala los valores a un rango de -1 a 1, dividiendo cada valor por el valor absoluto máximo de la variable.</li>
+                    <li><strong>Escalado Estándar:</strong> Este método transforma los valores para que tengan una media de 0 y una desviación estándar de 1.</li>
+                </ol>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Seleccione el Tipo de Escalado:</strong> Elija el método de escalado que mejor se adapte a sus datos y necesidades específicas.</li>
+                    <li><strong>Seleccione las Columnas que Desea Modificar:</strong> Decida qué columnas del dataset desea escalar o estandarizar. Puede seleccionar todas las columnas o elegir columnas específicas.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <div class="text-center">
+                    <pre>| Valor 1 | Valor 2 |
+| --- | --- |
+| 10  | 200 |
+| 15  | 300 |
+| 20  | 250 |
+| 25  | 400 |
+| 30  | 350 |</pre>
+                </div>
+
+                <hr>
+                <h6>Tipo de Escalado: Escalado MinMax</h6>
+                <h6>Resultados</h6>
+                <div class="text-center">
+                    <pre>Aplicando el Escalado MinMax, los valores se transforman al rango [0, 1]:
+
+| Valor 1 | Valor 2 |
+| --- | --- |
+| 0.0 | 0.0 |
+| 0.25 | 0.5 |
+| 0.5 | 0.25 |
+| 0.75 | 1.0 |
+| 1.0 | 0.75 |</pre>
+                </div>
+                <p>En este ejemplo, los valores de ambas columnas se han escalado al rango [0, 1] utilizando el método de Escalado MinMax.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

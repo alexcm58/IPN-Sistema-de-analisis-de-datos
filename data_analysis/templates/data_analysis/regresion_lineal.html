@@ -1,0 +1,116 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+
+{% block title %}Regresion Lineal{% endblock %}
+
+{% block formulario %}
+
+    <form action="{% url 'data_analysis:regresion_lineal' file_name=file_name %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex align-items-center mb-4 justify-content-between">
+                <h5 class="mb-0 me-4">Regresión Lineal</h5>
+                <!-- Botón para abrir el modal -->
+                <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+                    <i class="bi bi-book"></i> Ayuda
+                </button>
+            </div>
+
+            <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+                
+                <div>
+                    <p>Selecciona la variable dependiente (Y)</p>
+                    <select class="form-select" id="variable_dependiente" name="variable_dependiente">
+                        {% for columna in columnas %}
+                        {% if columna|length > 0 %}
+                        <option value="{{ columna }}">{{ columna }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="width: 100%">
+                    <p>Selecciona las variables independientes (X)</p>
+                    <div class="form-check mb-2">
+                        <!-- Casilla para seleccionar o deseleccionar todo -->
+                        <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                        <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                            Seleccionar todo
+                        </label>
+                    </div>
+                    <!-- Distribución de columnas -->
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                        {% for columna in columnas %}
+                        <div class="col" style="overflow: hidden">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="variables_independientes" value="{{ columna }}" id="check_{{ columna }}">
+                                <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                                    {{ columna }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+            </div>
+
+
+            {{ block.super }}
+        </form>
+
+        <script>
+            
+            $(document).ready(function(){
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+        </script>
+
+        <!-- seleccionar todo -->
+        <script>
+            document.getElementById('seleccionar_todo').addEventListener('change', function() {
+                var checkboxes = document.querySelectorAll('[name="variables_independientes"]');
+                checkboxes.forEach(chk => {
+                    chk.checked = this.checked;
+                });
+            });
+        </script>
+
+    {% comment %} modal {% endcomment %}
+  <script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+  
+      // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+      $('#modalInstrucciones').on('hidden.bs.modal', function () {
+      });
+    });
+  </script>
+
+  <!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Regresión Lineal</h5>
+                <p>La regresión lineal es una técnica para modelar la relación entre una variable dependiente (Y) y una o más variables independientes (X). El objetivo es predecir Y a partir de X.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Selecciona la Variable Dependiente (Y):</strong> Elige la variable que deseas predecir.</li>
+                    <li><strong>Selecciona las Variables Independientes (X):</strong> Elige las variables que usarás para predecir la variable dependiente. Puedes seleccionar todas las columnas o elegir columnas específicas.</li>
+                </ol>
+
+                <hr>
+                <h6>Resultados</h6>
+                <p>Se mostrará una gráfica de la relación entre la variable dependiente y cada una de las variables independientes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+            
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+
+{% block title %}Regresión Logística{% endblock %}
+
+{% block formulario %}
+<form action="{% url 'data_analysis:regresion_logistica' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Regresión Logística</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+        
+        <div>
+            <p>Selecciona la variable dependiente (Y)</p>
+            <select class="form-select" id="variable_dependiente" name="variable_dependiente">
+                <!-- Columnas_binarias es pasado al template y filtra solo las columnas binarias para mostrar -->
+                {% for columna in columnas_binarias %}
+                <option value="{{ columna }}">{{ columna }}</option>
+                {% endfor %}
+            </select>
+            {% if not columnas_binarias %}
+                <small class="text-info">
+                    <i class="bi bi-info-circle-fill"></i> No hay columnas que cumplan con los requisitos.
+                </small>
+            {% endif %}
+        </div>
+        
+        <div style="width: 100%">
+            <p>Selecciona las variables independientes (X)</p>
+            <div class="form-check mb-2">
+                <!-- Casilla para seleccionar o deseleccionar todo -->
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            <!-- Distribución de columnas -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                {% for columna in columnas_numericas %}
+                <div class="col" style="overflow: hidden">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="variables_independientes" value="{{ columna }}" id="check_{{ columna }}">
+                        <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                            {{ columna }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div>
+            <p>Umbral de clasificación:</p>
+            <input type="number" class="form-control" id="umbral" name="umbral" value="0.5" step="0.01" min="0" max="1">
+        </div>
+    </div>
+
+
+
+    {{ block.super }}
+</form>
+
+<!-- seleccionar todo -->
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="variables_independientes"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+{% comment %} modal {% endcomment %}
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Regresión Logística</h5>
+                <p>La regresión logística es una técnica utilizada para modelar la probabilidad de una variable dependiente categórica en función de una o más variables independientes. Es comúnmente usada para problemas de clasificación binaria.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Selecciona la Variable Dependiente (Y):</strong> Elige la variable categórica que deseas predecir. Esta será la variable dependiente en el modelo de regresión logística.</li>
+                    <li><strong>Selecciona las Variables Independientes (X):</strong> Elige una o más variables que usarás para predecir la variable dependiente. Puedes seleccionar todas las columnas o elegir columnas específicas.</li>
+                    <li><strong>Umbral de Clasificación:</strong> Define el umbral de probabilidad a partir del cual se clasificarán las observaciones en las categorías. Por ejemplo, si el umbral es 0.5, las observaciones con una probabilidad estimada mayor que 0.5 se clasificarán en la categoría positiva, y las observaciones con una probabilidad menor que 0.5 se clasificarán en la categoría negativa.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <p>Supongamos que se tiene el siguiente DataFrame con datos de pacientes:</p>
+                <div class="text-center">
+                    <pre>| Edad | Género | Colesterol | Presión Arterial | Problema Cardiaco |
+| --- | --- | --- | --- | --- |
+| 45  | M   | 220       | 140             | 1              |
+| 50  | F   | 180       | 120             | 0              |
+| 40  | M   | 200       | 130             | 0              |
+| 60  | M   | 240       | 150             | 1              |
+| 55  | F   | 210       | 140             | 1              |</pre>
+                </div>
+
+                <hr>
+                <h6>Variable Dependiente (Y): "Problema Cardiaco"</h6>
+                <p>Variables Independientes (X): "Edad", "Género", "Colesterol", "Presión Arterial"</p>
+                <p>Umbral de Clasificación: 0.5 (valor predeterminado)</p>
+                <p>En este ejemplo, el modelo de regresión logística utilizará las variables independientes para predecir la presencia o ausencia de problemas cardíacos en los pacientes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

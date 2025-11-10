@@ -1,0 +1,101 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+    <style>
+        .tooltip-inner {
+            background-color: #ffffff;
+            color: #000000;
+            max-width: 400px;
+            display: inline-block;
+            white-space: pre-line;
+            text-align: left;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Muestra de datos analizados -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+    <!-- Resultados del intervalo de confianza -->
+    <div class="container mt-5 mb-5">
+        <h4>Resultados del intervalo de confianza
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                <strong>Media:</strong> La media es el promedio de los valores en la muestra.<br>
+                <strong>Error Estándar:</strong> El error estándar mide cuánto podría variar la media de los datos si se tomaran diferentes muestras. Un error estándar pequeño significa que la media es más precisa.<br>
+                <strong>Intervalo Inferior:</strong> El intervalo inferior es el límite inferior del intervalo de confianza. Significa que tenemos un 95% de certeza de que la verdadera media está por encima de este valor.<br>
+                <strong>Intervalo Superior:</strong> El intervalo superior es el límite superior del intervalo de confianza. Significa que tenemos un 95% de certeza de que la verdadera media está por debajo de este valor.<br>">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>    
+        </h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Columna</th>
+                        <th>Media</th>
+                        <th>Error Estándar</th>
+                        <th>Intervalo Inferior</th>
+                        <th>Intervalo Superior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for columna, resultados in reporte_data.resultados.intervalo_confianza.items %}
+                        <tr>
+                            <td>{{ columna }}</td>
+                            <td>{{ resultados.Media }}</td>
+                            <td>{{ resultados.Error_Estandar }}</td>
+                            <td>{{ resultados.Intervalo_Inferior }}</td>
+                            <td>{{ resultados.Intervalo_Superior }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- gráfico del intervalo de confianza -->
+    {% for columna, resultados in reporte_data.resultados.intervalo_confianza.items %}
+        {% if resultados.grafico_path %}
+            <div class="container mt-5 mb-5 text-center">
+                <h4>Gráfico del intervalo de confianza para {{ columna }}</h4>
+                <img src="/temp_files/{{ resultados.grafico_path }}" alt="Gráfico de Intervalo de Confianza para {{ columna }}"
+                    class="img-fluid mx-auto d-block p-2 incluye-en-reporte" style="max-width: 80%;">
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+
+{% endblock %}

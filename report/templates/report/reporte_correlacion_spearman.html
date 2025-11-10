@@ -1,0 +1,86 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+    
+
+    <!-- Matriz de Correlación -->
+    <div class="container mt-5 mb-5">
+        <h4>Matriz de correlación de Spearman
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Matriz de Correlación de Spearman:</strong> Mide la fuerza y dirección de la relación monótona entre dos variables.<br>
+            <strong>Valores:</strong> Varían entre -1 y 1, donde 1 indica una correlación positiva perfecta, -1 una correlación negativa perfecta y 0 indica no correlación.">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th> <!-- Alinea los encabezados de columna -->
+                        {% for variable in reporte_data.resultados.matriz_correlacion.keys %}
+                            <th>{{ variable }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for variable, correlaciones in reporte_data.resultados.matriz_correlacion.items %}
+                        <tr>
+                            <th scope="row">{{ variable }}</th>
+                            {% for valor in correlaciones.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Heatmap para la Matriz de Correlación -->
+    {% if reporte_data.resultados.heatmap_path %}
+        <div class="container mt-5 mb-5">
+            <h4>Heatmap de Correlación de Spearman
+                <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                <strong>Heatmap de Correlación de Spearman:</strong> Representación visual de la matriz de correlación de Spearman.<br>
+                <strong>Colores:</strong> Los colores oscuros indican correlaciones fuertes (positivas o negativas), mientras que los colores claros indican correlaciones débiles.">
+                    <i class="text-info fas fa-question-circle fa-lg"></i>
+                </button>
+            </h4>            
+            <img src="/temp_files/{{ reporte_data.resultados.heatmap_path }}" alt="Heatmap de Correlación de Spearman"
+                class="img-fluid mx-auto d-block p-2 incluye-en-reporte">
+        </div>
+    {% endif %}
+{% endblock %}

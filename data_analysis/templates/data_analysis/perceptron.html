@@ -1,0 +1,138 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+
+{% block title %}Perceptrón Multicapa de Clasificación{% endblock %}
+
+{% block formulario %}
+
+    <form action="{% url 'data_analysis:perceptron' file_name=file_name %}" method="post">
+        {% csrf_token %}
+        <div class="d-flex align-items-center mb-4 justify-content-between">
+            <h5 class="mb-0 me-4">Perceptrón Multicapa de Clasificación</h5>
+            <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+                <i class="bi bi-book"></i> Ayuda
+            </button>
+        </div>
+
+        <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+            
+            <div>
+                <p>Selecciona la variable objetivo (Y)</p>
+                <select class="form-select" id="variable_objetivo" name="variable_objetivo">
+                    {% for columna in columnas_y %}
+                    <option value="{{ columna }}">{{ columna }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div style="width: 100%">
+                <p>Selecciona las características (X)</p>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                    <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                        Seleccionar todo
+                    </label>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                    {% for columna in columnas_x %}
+                    <div class="col">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="caracteristicas" value="{{ columna }}" id="check_{{ columna }}">
+                            <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}">
+                                {{ columna }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div>
+                <label for="hidden_layer_sizes">Tamaños de las capas ocultas:</label>
+                <input type="text" class="form-control" id="hidden_layer_size" name="hidden_layer_sizes" value="100" placeholder="Ej: 100, 100">
+            </div>
+            
+            <div>
+                <label for="activation">Función de activación:</label>
+                <select class="form-select" id="activation" name="activation">
+                    <option value="relu" selected>ReLU</option>
+                    <option value="tanh">Tanh</option>
+                    <option value="logistic">Logistic</option>
+                    <option value="identity">Identity</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="solver">Algoritmo de optimización:</label>
+                <select class="form-select" id="solver" name="solver">
+                    <option value="adam" selected>Adam</option>
+                    <option value="sgd">SGD</option>
+                    <option value="lbfgs">L-BFGS</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="alpha">Parámetro de regularización alpha:</label>
+                <input type="number" class="form-control" id="alpha" name="alpha" step="0.0001" min="0.0001" value="0.0001">
+            </div>
+
+        </div>
+
+        {{ block.super }}
+    </form>
+
+    <script>
+        document.getElementById('seleccionar_todo').addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('[name="caracteristicas"]');
+            checkboxes.forEach(chk => {
+                chk.checked = this.checked;
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function(){
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+    <!-- Modal de Instrucciones de Uso -->
+    <div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>Perceptrón Multicapa de Clasificación</h5>
+                    <p>El perceptrón multicapa es un tipo de red neuronal artificial feedforward que puede modelar fronteras de decisión complejas y realizar tareas de clasificación sobre múltiples clases.</p>
+
+                    <hr>
+                    <h5>Pasos a Seguir</h5>
+                    <ol>
+                        <li><strong>Selecciona la Variable Objetivo (Y):</strong> Elige la variable que deseas predecir.</li>
+                        <li><strong>Selecciona las Características (X):</strong> Elige las variables que utilizarás para entrenar el modelo.</li>
+                        <li><strong>Configura el Modelo:</strong> Ajusta los parámetros del modelo para mejorar su rendimiento.</li>
+                    </ol>
+
+                    <hr>
+                    <h6>Parámetros Importantes</h6>
+                    <ul>
+                        <li><strong>Tamaños de las Capas Ocultas:</strong> Define el número de neuronas en cada capa oculta de la red.</li>
+                        <li><strong>Función de Activación:</strong> Determina la función de activación que se utiliza en las neuronas, afectando la no linealidad del modelo.</li>
+                        <li><strong>Algoritmo de Optimización:</strong> Selecciona el algoritmo que ajustará los pesos de la red.</li>
+                        <li><strong>Alpha:</strong> Controla la magnitud de la regularización para evitar el sobreajuste.</li>
+                    </ul>
+
+                    <hr>
+                    <h6>Ejemplo de Configuración</h6>
+                    <p><strong>Tamaños de las Capas Ocultas:</strong> (100, 100)</p>
+                    <p><strong>Función de Activación:</strong> ReLU</p>
+                    <p><strong>Algoritmo de Optimización:</strong> Adam</p>
+                    <p><strong>Alpha:</strong> 0.0001</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

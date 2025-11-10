@@ -1,0 +1,182 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+
+    <!-- Estadísticas Básicas -->
+    <div class="container mt-5 mb-5">
+        <h4>Resultados del modelo
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                    <strong>Accuracy:</strong> La proporción de predicciones correctas (tanto verdaderos positivos como verdaderos negativos) entre el total de predicciones realizadas por el modelo.<br>
+                    <strong>Max Depth:</strong> La profundidad máxima del árbol de decisión, es decir, el número máximo de niveles desde la raíz hasta la hoja más profunda.<br>
+                    <strong>Min Samples Leaf:</strong> El número mínimo de muestras que debe tener una hoja (nodo terminal) para ser creada en el árbol de decisión. Ayuda a evitar el sobreajuste.<br>">
+            <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Resultado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat, value in reporte_data.resultados.estadisticas.items %}
+                    <tr>
+                        <td>{{ stat }}</td>
+                        {% if stat == 'Variables Predictoras' %}
+                            <td>
+                                {% for variable in value %}
+                                    {{ variable }}<br>
+                                {% endfor %}
+                            </td>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>            
+        </div>
+    </div>
+
+    <!-- Reporte de Clasificación -->
+    <div class="container mt-5 mb-5">
+        <h4>Reporte de Clasificación
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+                    <strong>Clase:</strong> Cada una de las categorías o etiquetas que el modelo de árbol de decisión puede predecir.<br>
+                    <strong>Precisión:</strong> Proporción de verdaderos positivos entre todos los casos que el modelo ha clasificado como positivos (indicando cuántos de los positivos predichos son realmente correctos).<br>
+                    <strong>Recall:</strong> Proporción de verdaderos positivos entre todos los casos que son realmente positivos (indicando cuántos de los casos positivos reales han sido capturados por el modelo).<br>
+                    <strong>F1-Score:</strong> La media armónica de la precisión y el recall, que proporciona una medida balanceada de la exactitud del modelo considerando ambas métricas.<br>
+                    <strong>Soporte:</strong> El número de ocurrencias reales de cada clase en el conjunto de datos de evaluación.<br>">
+            <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>        
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Precisión</th>
+                        <th>Recall</th>
+                        <th>F1-Score</th>
+                        <th>Soporte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fila in reporte_data.resultados.reporte_clasificacion     %}
+                        <tr>
+                            <td>{{ fila.clase }}</td>
+                            <td>{{ fila.precision|floatformat:3 }}</td>
+                            <td>{{ fila.recall|floatformat:3 }}</td>
+                            <td>{{ fila.f1_score|floatformat:3 }}</td>
+                            <td>{{ fila.soporte }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Matriz de Confusión -->
+    <div class="container mt-5 mb-5">
+        <h4>Matriz de Confusión
+        <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Matriz de Confusión:</strong> Una tabla que se utiliza para describir el rendimiento de un modelo de clasificación. Muestra la relación entre las etiquetas reales y las predichas por el modelo, organizando los resultados en verdaderos positivos, falsos positivos, verdaderos negativos y falsos negativos.<br>">
+        <i class="text-info fas fa-question-circle fa-lg"></i>
+        </button>
+
+        </h4>
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Real \ Predicho</th>
+                        {% for clase in reporte_data.resultados.classes %}
+                            <th>{{ clase }}</th>  <!-- Nombres de las categorías en la parte superior -->
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clase, fila in reporte_data.resultados.clases_y_filas %}
+                        <tr>
+                            <th>{{ clase }}</th>  <!-- Nombres de las categorías en la parte lateral -->
+                            {% for valor in fila %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Importancia de las Características -->
+    <div class="container mt-5 mb-5">
+        <h4>Importancia de las características
+        <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Importancia de las características:</strong> Una medida de cuánto cada característica contribuye al poder predictivo del modelo de árbol de decisión. Se calcula evaluando la reducción en el criterio de división (por ejemplo, Gini, entropía) atribuible a cada característica en todas las divisiones donde se utiliza.<br>">
+        <i class="text-info fas fa-question-circle fa-lg"></i>
+        </button>
+        </h4>
+        
+        <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>Importancia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for caracteristica, importancia in reporte_data.resultados.importancia_caracteristicas.items %}
+                        <tr>
+                            <td>{{ caracteristica }}</td>
+                            <td>{{ importancia }}</td>  <!-- Formato para mostrar con tres decimales -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Visualización del Árbol de Decisión -->
+    <div class="container mt-5 mb-5">
+        <h4>Árbol de Decisión</h4>
+        <img src="/temp_files/{{ reporte_data.resultados.path_imagen_arbol }}" alt="Árbol de Decisión de Clasificación"
+            class="img-fluid mx-auto d-block p-2 incluye-en-reporte">
+    </div>
+
+{% endblock %}

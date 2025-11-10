@@ -1,0 +1,89 @@
+{% extends "report/plantilla_reporte.html" %}
+
+{% block reporte %}
+    <style>
+        .tooltip-inner {
+            background-color: #ffffff;
+            color: #000000;
+            max-width: 400px;
+            display: inline-block;
+            white-space: pre-line;
+            text-align: left;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+
+    <div class="mb-5">
+        <h3>{{ reporte_data.titulo }}</h3>
+        <p>{{ reporte_data.descripcion }}</p>
+    </div>
+
+    <!-- Primeras Filas Analizadas -->
+    <div class="container mt-5 mb-5">
+        <h4>Muestra de datos analizados</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        {% for columna in reporte_data.resultados.nombres_columnas %}
+                            <th>{{ columna }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                    {% for fila in reporte_data.resultados.primeras_filas %}
+                        <tr>
+                            {% for valor in fila.values %}
+                                <td>{{ valor }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>                
+        </div>
+    </div>
+    
+    <!-- Medidas de Variabilidad -->
+    <div class="container mt-5 mb-5">
+        <h4>Medidas de Variabilidad
+            <button type="button" class="btn btn-sm btn-outline-light transparent-tooltip" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" title="
+            <strong>Varianza:</strong> La varianza es una medida de dispersión que muestra qué tan dispersos están los valores de una muestra alrededor de la media.<br>
+            <strong>Desviación Estándar:</strong> La desviación estándar es una medida de dispersión que indica cuánto se alejan los valores de la media.<br>
+            <strong>Rango:</strong> El rango es la diferencia entre el valor máximo y el valor mínimo en un conjunto de datos.<br>
+            <strong>Coeficiente de Variación:</strong> El coeficiente de variación es una medida de dispersión relativa que compara la desviación estándar con la media.<br>">
+                <i class="text-info fas fa-question-circle fa-lg"></i>
+            </button>        
+        </h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Columna</th>
+                        <th>Varianza</th>
+                        <th>Desviación Estándar</th>
+                        <th>Rango</th>
+                        <th>Coeficiente de Variación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for columna, medidas in reporte_data.resultados.variabilidad.items %}
+                        <tr>
+                            <td>{{ columna }}</td>
+                            <td>{{ medidas.Varianza }}</td>
+                            <td>{{ medidas.Desviacion_Estandar }}</td>
+                            <td>{{ medidas.Rango }}</td>
+                            <td>{{ medidas.Coeficiente_de_Variacion }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+{% endblock %}

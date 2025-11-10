@@ -1,0 +1,97 @@
+{% load static %}
+<div class="mt-4">
+    <!-- Botones de navegación fuera del contenedor de la tabla -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="btn-group">
+        <!-- Botón Anterior -->
+            <button type="button" class="btn btn-sm btn-secondary" onclick="loadVersion('prev')">
+                <i class="bi bi-arrow-left"></i>
+                {% comment %} <i class="bi bi-arrow-counterclockwise"></i> {% endcomment %}
+                Atras
+            </button>
+
+            <!-- Botón Siguiente -->
+            <button type="button" class="btn btn-sm btn-secondary" onclick="loadVersion('next')">
+                Rehacer
+                <i class="bi bi-arrow-right"></i>
+                {% comment %} <i class="bi bi-arrow-clockwise"></i> {% endcomment %}
+            </button>
+        
+        </div>
+        <div>
+            <span class="me-2">Instituto Politécnico Nacional</span>
+            <img id="logo" class="img-fluid" src="{% static 'images/logo_rojo.png' %}" alt="Logo IPN" style="max-width: 28px;">
+        </div>
+    </div>
+
+    
+    <!-- Contenedor solo para la tabla -->
+    <div class="scrollable-table bg-white rounded shadow mb-3 mt-1">
+        <div id="table-container">
+            {{ dataframe|safe }}
+        </div>
+    </div>
+</div>
+ 
+
+<script>
+    var file_name = "{{ file_name }}";
+    var startRow = 20;
+    var isLoading = false;
+    var isAllDataLoaded = false;
+    
+    function fetchMoreRows() {
+        if (isLoading || isAllDataLoaded) return;
+        
+        isLoading = true;
+        fetch(`/cargar_mas_filas/${file_name}?start=${startRow}`)
+            .then(response => response.json())
+            .then(json => {
+                let data = json.data.trim();
+                if (data) {
+                    var tableBody = document.querySelector('.scrollable-table table tbody');
+                    tableBody.insertAdjacentHTML('beforeend', data);
+                    startRow += 20;
+                } else {
+                    isAllDataLoaded = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                isLoading = false; 
+            });
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var scrollableTable = document.querySelector('.scrollable-table');
+        if (scrollableTable) { 
+            scrollableTable.onscroll = debounce(function() {
+                var scrollBottom = scrollableTable.scrollHeight - scrollableTable.clientHeight - scrollableTable.scrollTop;
+                if (scrollBottom < 100 && !isLoading) {
+                    fetchMoreRows();
+                }
+            }, 100);
+        }
+    });
+    
+</script>
+
+<script>
+    var file_name = "{{ file_name }}";
+
+    function loadVersion(direction) {
+        var actionUrl = `/cambiar_version/${file_name}/${direction}`;
+        window.location.href = actionUrl;
+    }
+</script>

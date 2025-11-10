@@ -1,0 +1,111 @@
+{% extends "data_analysis/plantilla_analisis.html" %}
+{% block formulario %}
+
+<form action="{% url 'data_analysis:variabilidad' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Variabilidad</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div id="group_variabilidad" style="width: 100%;">
+        <p>Seleccione las variables numéricas:</p>
+        <div class="form-check mb-2">
+            <!-- Casilla para seleccionar o deseleccionar todo -->
+            <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+            <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                Seleccionar todo
+            </label>
+        </div>
+        <!-- Distribución de columnas -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+            {% for columna in columnas_numericas %}
+            <div class="col" style="overflow: hidden">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                    <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                        {{ columna }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+   
+    {{ block.super }}
+
+</form>
+
+<script>
+    // seleccionar todas las columnas
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        // Cerrar el modal al presionar el botón de cerrar o hacer clic fuera del modal
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+<!-- Modal de Instrucciones de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Variabilidad</h5>
+                <p>La variabilidad mide la dispersión o dispersión de un conjunto de datos. Las medidas comunes de variabilidad incluyen la desviación estándar, la varianza, el rango intercuartílico (IQR) y el coeficiente de variación.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Seleccione las Variables Numéricas:</strong> Elija las variables numéricas para las que desea calcular las medidas de variabilidad. Puede seleccionar todas las columnas numéricas o elegir variables específicas.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <p>Supongamos que se tiene el siguiente DataFrame con información sobre pacientes:</p>
+                <div class="text-center">
+                    <pre>| Edad |
+| --- |
+| 45 |
+| 50 |
+| 40 |
+| 60 |
+| 55 |</pre>
+                </div>
+
+                <hr>
+                <h6>Variables Numéricas</h6>
+                <p>"Edad", "Colesterol", "Peso"</p>
+
+                <hr>
+                <h6>Resultados de la Variabilidad</h6>
+                <p>Para la variable "Edad":</p>
+                <ul>
+                    <li><strong>Desviación Estándar:</strong> 7.91</li>
+                    <li><strong>Varianza:</strong> 62.5</li>
+                    <li><strong>Rango Intercuartílico (IQR):</strong> 15</li>
+                    <li><strong>Coeficiente de Variación:</strong> 0.16 (7.91 / 50)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

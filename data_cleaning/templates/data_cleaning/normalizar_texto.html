@@ -1,0 +1,139 @@
+{% extends "data_cleaning/plantilla_opciones.html" %}
+
+{% block formulario %}
+
+<form action="{% url 'data_cleaning:normalizar_texto' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Normalizar Texto</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalInstrucciones">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+
+        <div>
+            <p>Seleccione tipo de variable a analizar:</p>
+            <select class="form-select" id="alcance" name="alcance">
+                <option value="nombres_columnas">Nombres de columnas</option>
+                <option value="columna_especifica">Elegir columnas</option>
+                <option value="todo">Todo el dataset</option>
+            </select>
+        </div>
+
+        <div id="group_columna_especifica" style="display: none; width: 100%">
+            <p>Seleccione las columnas:</p>
+            <div class="form-check mb-2">
+                <!-- Casilla para seleccionar o deseleccionar todo -->
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            <!-- Distribución de columnas -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                {% for columna in columnas %}
+                <div class="col" style="overflow: hidden">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                        <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                            {{ columna }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if not columnas %}
+                <small class="text-info">
+                    <i class="bi bi-info-circle-fill"></i> No hay columnas que cumplan con los requisitos.
+                </small>
+            {% endif %}
+        </div>    
+
+    </div>
+
+
+
+    {{ block.super }}
+</form>
+
+<script>
+    document.getElementById('alcance').addEventListener('change', function() {
+        var group = document.getElementById('group_columna_especifica');
+        if(this.value === 'columna_especifica') {
+            group.style.display = 'block';
+        } else {
+            group.style.display = 'none';
+        }
+    });
+</script>
+<!-- seleccionar todo -->
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#modalInstrucciones').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+
+<!-- Modal de Uso -->
+<div class="modal fade" id="modalInstrucciones" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Normalización de Datos</h5>
+                <p>La normalización de texto nos ayuda a transformar y estandarizar el texto para que cada dato sea más uniforme y consistente. Esto es crucial para mejorar la calidad del análisis y procesamiento de datos.</p>
+                <p>La normalización de texto puede incluir varias técnicas y pasos, entre los cuales se encuentran:</p>
+                <ul>
+                    <li><em>Conversión a minúsculas:</em> Todos los caracteres se convierten a minúsculas.</li>
+                    <li><em>Reemplazo de guiones con espacios:</em> Guiones y otros separadores similares se reemplazan por espacios.</li>
+                    <li><em>Eliminación de puntuación:</em> Se eliminan signos de puntuación.</li>
+                    <li><em>Eliminación de espacios extra:</em> Se eliminan espacios adicionales entre palabras y al inicio o final del texto.</li>
+                </ul>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Seleccionar el Tipo de Variables a Analizar:</strong> Decide si deseas normalizar todo el dataset o solo columnas específicas.</li>
+                    <li><strong>Seleccionar la Columna Deseada y Aplicar Limpieza:</strong> Selecciona la columna o columnas deseadas y aplica los pasos de normalización mencionados anteriormente para limpiar el texto.</li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <div class="text-center">
+                    <pre>"John-Doe"
+" Jane, Smith "
+"Alice.O'Connor"</pre>
+                </div>
+                
+                <hr>
+                <h6>Resultados</h6>
+                <div class="text-center">
+                    <pre>"john doe"
+"jane smith"
+"alice oconnor"</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

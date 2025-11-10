@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+
+<!-- Este template se encarga de mostrar el menú principal de la aplicación, es un contenedor general -->
+
+{% block title %}Menu Principal</title>{% endblock %}
+
+{% block content %}
+    {% if info %}
+        <div class="mt-4">
+            {% if 'errores' in info %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Algo salió mal</strong>
+                    <p>{{ info|linebreaks }}</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% else %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Resultados:</strong>
+                    <p>{{ info|linebreaks }}</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div>
+        {% include "file_handler/tabla_botones.html" %}    
+    </div>
+    
+{% endblock %}

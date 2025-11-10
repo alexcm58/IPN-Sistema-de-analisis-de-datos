@@ -1,0 +1,186 @@
+{% extends "data_cleaning/plantilla_opciones.html" %}
+
+{% block formulario %}
+
+<form action="{% url 'data_cleaning:procesar_outliers' file_name=file_name %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex align-items-center mb-4 justify-content-between">
+        <h5 class="mb-0 me-4">Procesar outliers</h5>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-outline-info p-1" data-bs-toggle="modal" data-bs-target="#modalOutliers">
+            <i class="bi bi-book"></i> Ayuda
+        </button>
+    </div>
+
+
+    <div class="d-flex gap-4 justify-content-start flex-wrap mt-2 mb-4">
+
+        <div>
+            <p>Umbral IQR:</p>
+            <input type="number" class="form-control" id="umbral_iqr" name="umbral_iqr" value="1.5" step="0.1">
+        </div>
+
+        <div>
+            <p>Acción para los outliers:</p>
+            <select class="form-select" id="accion" name="accion">
+                <option value="ajustar">Ajustar Outliers</option>
+                <option value="eliminar">Eliminar Filas con Outliers</option>
+            </select>
+        </div>
+
+        <div style="width: 100%">
+            <p>Seleccione las columnas que desea evaluar:</p>
+            <div class="form-check mb-2">
+                <!-- Casilla para seleccionar o deseleccionar todo -->
+                <input class="form-check-input" type="checkbox" id="seleccionar_todo">
+                <label class="form-check-label mb-2" for="seleccionar_todo" style="font-weight: bold;">
+                    Seleccionar todo
+                </label>
+            </div>
+            {% if not columnas %}
+                <small class="text-info">
+                    <i class="bi bi-info-circle-fill"></i> No hay columnas disponibles para evaluar.
+                </small>
+            {% else %}
+                <!-- Distribución de columnas -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-0">
+                    {% for columna in columnas %}
+                    <div class="col" style="overflow: hidden">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="columnas_a_manipular" value="{{ columna }}" id="check_{{ columna }}">
+                            <label class="form-check-label text-truncate" for="check_{{ columna }}" title="{{ columna }}" style="max-width: 90%; cursor: pointer;">
+                                {{ columna }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+    
+    </div>
+
+
+    {{ block.super }}
+
+</form>
+
+<!-- seleccionar todo -->
+<script>
+    document.getElementById('seleccionar_todo').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('[name="columnas_a_manipular"]');
+        checkboxes.forEach(chk => {
+            chk.checked = this.checked;
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#modalOutliers').on('hidden.bs.modal', function () {
+        });
+    });
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="modalOutliers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Instrucciones de uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Procesar Outliers</h5>
+                <p>Los outliers son valores que se encuentran significativamente alejados de la mayoría de los datos en una distribución. Identificar y tratar adecuadamente los outliers puede mejorar la precisión y la fiabilidad de los análisis. Solo aplica para valores numéricos.</p>
+
+                <hr>
+                <h5>Umbral IQR</h5>
+                <p>El rango intercuartílico (IQR) es una medida estadística que describe la dispersión de los datos. Los outliers se pueden identificar utilizando un umbral basado en el IQR. Un valor comúnmente utilizado es 1.5.</p>
+
+                <hr>
+                <h5>Pasos a Seguir</h5>
+                <ol>
+                    <li><strong>Seleccione el Umbral IQR:</strong> Selecciona el Umbral IQR, por defecto viene 1.5.</li>
+                    <li><strong>Seleccione el Alcance:</strong> Decide si deseas aplicar la acción a todo el dataset o solo a columnas específicas.</li>
+                    <li><strong>Acción para los Outliers:</strong>
+                        <ul>
+                            <li>Elige ajustar outliers a valores dentro del rango del Umbral IQR.</li>
+                            <li>Elige eliminar filas con el valor fuera del Umbral IQR.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <hr>
+                <h6>Ejemplo</h6>
+                <div class="text-center">
+                    <pre>Valor
+---
+10
+---
+12
+---
+11
+---
+13
+---
+50
+---
+12
+---
+14
+---</pre>
+                </div>
+
+                <hr>
+                <h6>Ajustar Outliers:</h6>
+                <div class="text-center">
+                    <pre>El valor 50 se ajusta al límite superior del rango permitido (16).
+
+Valor
+---
+10
+---
+12
+---
+11
+---
+13
+---
+16
+---
+12
+---
+14
+---</pre>
+                </div>
+
+                <hr>
+                <h6>Eliminar Filas con Outliers:</h6>
+                <div class="text-center">
+                    <pre>Las filas que contienen outliers (valores fuera del rango permitido) se eliminan.
+
+Valor
+---
+10
+---
+12
+---
+11
+---
+13
+---
+12
+---
+14
+---</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
